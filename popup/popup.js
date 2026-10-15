@@ -74,21 +74,15 @@ async function remove(store) {
 async function enrich(store) {
   setStatus('');
   try {
-    // permissions.request must run directly inside the click gesture.
-    const granted = await chrome.permissions.request({ origins: [`https://${store.customDomain}/*`] });
+    const host = store.siteHost || store.customDomain;
+    // permissions.request must be called directly inside the click gesture.
+    const request = chrome.permissions.request({ origins: [`https://${host}/*`] });
+    // The prompt can close this popup; the service worker finishes the job from this marker.
+    chrome.storage.local.set({ pendingEnrich: store.domain });
+    const granted = await request;
+    await chrome.storage.local.remove('pendingEnrich');
     if (!granted) return setStatus('Permission denied; cannot enrich.', true);
-    const res = await fetch(`https://${store.customDomain}/meta.json`, { credentials: 'omit' });
-    if (!res.ok) throw new Error(`meta.json returned ${res.status}`);
-    const meta = await res.json();
-    await send({
-      type: 'enrich-store',
-      domain: store.domain,
-      data: {
-        productCount: Number.isFinite(meta.published_products_count) ? meta.published_products_count : null,
-        description: typeof meta.description === 'string' ? meta.description : null,
-        name: typeof meta.name === 'string' ? meta.name : null,
-      },
-    });
+    await send({ type: 'enrich-fetch', domain: store.domain });
     setStatus(`Enriched ${store.customDomain}.`);
   } catch (e) {
     setStatus(`Enrich failed: ${e.message}`, true);

@@ -24,6 +24,7 @@ test('detects a store via window.Shopify and keys it by the myshopify domain', (
   assert.deepEqual(r, {
     domain: 'cool-shop.myshopify.com',
     customDomain: 'coolshop.com',
+    siteHost: 'www.coolshop.com',
     name: 'Cool Shop',
     theme: 'Dawn',
     currency: 'USD',
@@ -90,4 +91,16 @@ test('name falls back from og:site_name to title to hostname', () => {
   assert.equal(detect(snap({ ...base, ogSiteName: 'OG', title: 'T' })).name, 'OG');
   assert.equal(detect(snap({ ...base, ogSiteName: '', title: ' T ' })).name, 'T');
   assert.equal(detect(snap({ ...base, ogSiteName: null, title: '' })).name, 'fallback.com');
+});
+
+test('rejects a Shopify.shop that is not a myshopify.com subdomain', () => {
+  for (const shop of ['evil.com', 'rival.myshopify.com.evil.com', '.myshopify.com', 'a b.myshopify.com']) {
+    assert.equal(detect(snap({ shopify: { shop } })), null, shop);
+  }
+});
+
+test('keeps the raw visited host as siteHost for fetches', () => {
+  const r = detect(snap({ hostname: 'WWW.Shop.IO', metaNames: ['shopify-digital-wallet'] }));
+  assert.equal(r.siteHost, 'www.shop.io');
+  assert.equal(r.customDomain, 'shop.io');
 });

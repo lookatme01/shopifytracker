@@ -9,6 +9,8 @@
     return String(h || '').trim().toLowerCase().replace(/^www\./, '');
   }
 
+  const SHOP_RE = /^[a-z0-9][a-z0-9-]*\.myshopify\.com$/;
+
   function isShopifyOwned(host) {
     return host === 'shopify.com' || host.endsWith('.shopify.com');
   }
@@ -26,7 +28,8 @@
     if (!host || isShopifyOwned(host)) return null;
 
     const s = snapshot.shopify && typeof snapshot.shopify === 'object' ? snapshot.shopify : null;
-    const shop = s && typeof s.shop === 'string' && s.shop ? normalizeHost(s.shop) : null;
+    const rawShop = s && typeof s.shop === 'string' ? normalizeHost(s.shop) : '';
+    const shop = SHOP_RE.test(rawShop) ? rawShop : null;
     const metaNames = snapshot.metaNames || [];
     const strong =
       Boolean(shop) ||
@@ -40,6 +43,7 @@
     return {
       domain: shop || host,
       customDomain: host,
+      siteHost: String(snapshot.hostname).trim().toLowerCase(),
       name,
       theme: (s && s.theme && typeof s.theme.name === 'string' && s.theme.name) || null,
       currency: (s && s.currency && typeof s.currency.active === 'string' && s.currency.active) || null,

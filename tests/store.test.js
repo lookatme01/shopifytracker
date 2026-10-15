@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { upsertStore, removeStore, applyEnrichment } = require('../src/store.js');
+const { upsertStore, removeStore, applyEnrichment, enrichmentFromMeta } = require('../src/store.js');
 
 const det = (o = {}) => ({
   domain: 'a.myshopify.com', customDomain: 'a.com', name: 'A',
@@ -61,4 +61,19 @@ test('applyEnrichment ignores unknown domains and null fields', () => {
   assert.equal(out[0].name, 'A');
   assert.equal(out[0].description, 'D');
   assert.ok(!('productCount' in out[0]) || out[0].productCount === undefined);
+});
+
+test('enrichmentFromMeta reads count, description and name from meta.json', () => {
+  assert.deepEqual(
+    enrichmentFromMeta({ published_products_count: 12, description: 'Hi', name: ' Shop ' }),
+    { productCount: 12, description: 'Hi', name: 'Shop' }
+  );
+});
+
+test('enrichmentFromMeta tolerates garbage and caps lengths', () => {
+  const empty = { productCount: null, description: null, name: null };
+  for (const bad of [null, undefined, 'x', [], 5]) assert.deepEqual(enrichmentFromMeta(bad), empty);
+  assert.equal(enrichmentFromMeta({ description: 'd'.repeat(900) }).description.length, 500);
+  assert.equal(enrichmentFromMeta({ name: 'n'.repeat(900) }).name.length, 200);
+  assert.equal(enrichmentFromMeta({ published_products_count: '12' }).productCount, null);
 });

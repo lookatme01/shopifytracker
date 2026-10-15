@@ -46,5 +46,15 @@
     return next;
   }
 
-  return { upsertStore, removeStore, applyEnrichment };
+  function enrichmentFromMeta(meta) {
+    const m = meta && typeof meta === 'object' && !Array.isArray(meta) ? meta : {};
+    const name = typeof m.name === 'string' ? m.name.trim().slice(0, 200) : '';
+    return {
+      productCount: Number.isFinite(m.published_products_count) ? m.published_products_count : null,
+      description: typeof m.description === 'string' ? m.description.slice(0, 500) : null,
+      name: name || null,
+    };
+  }
+
+  return { upsertStore, removeStore, applyEnrichment, enrichmentFromMeta };
 });

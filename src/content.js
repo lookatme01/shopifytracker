@@ -4,7 +4,9 @@
   function onSnapshot(event) {
     if (done) return;
     try {
-      const detected = ShopifyDetect.detect(JSON.parse(event.detail));
+      // The page controls the event, so the hostname comes from this script's own view of the page.
+      const snapshot = { ...JSON.parse(event.detail), hostname: location.hostname };
+      const detected = ShopifyDetect.detect(snapshot);
       done = true;
       document.removeEventListener('shopify-detector:snapshot', onSnapshot);
       if (detected) chrome.runtime.sendMessage({ type: 'store-detected', detected });
