@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "Shopify Store Detector",
+  "version": "0.1.0",
+  "description": "Detects Shopify stores as you browse and keeps an exportable list.",
+  "minimum_chrome_version": "111",
+  "permissions": ["storage"],
+  "optional_host_permissions": ["https://*/*"],
+  "background": { "service_worker": "src/background.js" },
+  "action": { "default_title": "Shopify Store Detector", "default_popup": "popup/popup.html" },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["src/apps.js", "src/detect.js", "src/content.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["src/main-world.js"],
+      "world": "MAIN",
+      "run_at": "document_idle"
+    }
+  ]
+}
