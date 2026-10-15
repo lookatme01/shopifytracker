@@ -82,7 +82,7 @@ function render() {
     if (s.productCount != null) left.push(`${s.productCount} products`);
     if (s.apps && s.apps.length) left.push(s.apps.join(', '));
     const note = el('p', 'note');
-    note.append(el('span', 'note-left', left.join(' \u00b7 ')), el('span', 'note-track', `\u00d7${s.visitCount} ${when(s.lastSeen)}`));
+    note.append(el('span', 'note-left', left.join(' \u00b7 ') || 'No apps detected'), el('span', 'note-track', `\u00d7${s.visitCount} ${when(s.lastSeen)}`));
     li.append(note);
     if (s.description) li.append(el('p', 'desc', s.description));
     list.append(li);
