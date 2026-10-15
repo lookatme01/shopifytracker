@@ -27,7 +27,7 @@ body {
   width: 420px;
   min-height: 200px;
   margin: 0;
-  padding: 0 0 148px;
+  padding: 0 0 100px;
   background: var(--stock);
   color: var(--ink);
   font: 13px/1.4 "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
@@ -83,7 +83,7 @@ body {
   list-style: none;
   margin: 8px 12px 0;
   padding: 0;
-  max-height: 300px;
+  max-height: 350px;
   overflow-y: auto;
   border: 2px solid var(--rule);
   scrollbar-width: thin;
@@ -93,7 +93,13 @@ body {
 
 .row { padding: 9px 12px 10px; border-top: 1px solid var(--rule); }
 .row:first-child { border-top: 0; }
-.row.is-new { background: var(--wash); }
+/* NEW rows print the whole header strip hot: the page's one signature move. */
+.row.is-new .row-head {
+  margin: -9px -12px 0;
+  padding: 9px 12px;
+  background: var(--hot);
+  color: var(--on-hot);
+}
 
 .row-head { display: flex; align-items: baseline; gap: 8px; }
 .name {
@@ -106,8 +112,7 @@ body {
 }
 .tag {
   padding: 1px 6px;
-  background: var(--hot);
-  color: var(--on-hot);
+  border: 1.5px solid currentColor;
   font-size: 12px;
   font-weight: 800;
   letter-spacing: .08em;
@@ -120,18 +125,22 @@ body {
 }
 @media (prefers-reduced-motion: reduce) { .tag { animation: none; } }
 
-.row-actions { display: flex; gap: 4px; }
+.row-actions { display: flex; gap: 2px; }
 .row-actions button {
-  padding: 3px 9px;
-  border: 1px solid var(--rule);
+  padding: 4px 6px;
+  border: 0;
   background: transparent;
-  color: var(--ink);
+  color: inherit;
   font: inherit;
   font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
   cursor: pointer;
 }
-.row-actions button:hover { background: var(--ink); color: var(--stock); }
-.row-actions button.danger:hover { background: var(--hot); border-color: var(--hot); color: var(--on-hot); }
+.row-actions button:hover { background: var(--ink); color: var(--stock); text-decoration: none; }
+.row-actions button.danger:hover { background: var(--hot); color: var(--on-hot); }
+.is-new .row-actions button:hover,
+.is-new .row-actions button.danger:hover { background: var(--on-hot); color: var(--hot); }
 
 .fields {
   display: grid;
@@ -153,7 +162,23 @@ body {
 .fields dd { margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fields .domain { font: 12.5px ui-monospace, Menlo, Consolas, monospace; padding-top: 1px; }
 
-.note { margin: 6px 0 0; color: var(--soft); font-size: 12.5px; overflow-wrap: anywhere; }
+.note {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 6px 0 0;
+  color: var(--soft);
+  font-size: 12.5px;
+}
+.note-left { min-width: 0; overflow-wrap: anywhere; }
+.note-track {
+  flex-shrink: 0;
+  color: var(--ink);
+  font: 12px ui-monospace, Menlo, Consolas, monospace;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
 .desc {
   margin: 4px 0 0;
   display: -webkit-box;
@@ -164,7 +189,8 @@ body {
 
 #empty { margin: 8px 12px 0; padding: 16px 12px; border: 2px solid var(--rule); }
 
-#status { margin: 8px 12px 0; min-height: 1.4em; font-weight: 700; }
+#status { margin: 8px 12px 0; font-weight: 700; }
+#status:empty { display: none; }
 #status.error { color: var(--hot); }
 
 footer {
