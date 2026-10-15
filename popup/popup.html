@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Shopify Store Detector</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <h1>Shopify stores <span id="count"></span></h1>
+    <input id="search" type="search" placeholder="Search stores…" aria-label="Search stores">
+  </header>
+  <ul id="list"></ul>
+  <p id="empty" hidden>No Shopify stores detected yet. Browse the web and they will show up here.</p>
+  <p id="status" role="status"></p>
+  <footer>
+    <button id="export-csv">Export CSV</button>
+    <button id="export-json">Export JSON</button>
+    <button id="clear" class="danger">Clear all</button>
+    <label><input id="incognito" type="checkbox"> Log incognito</label>
+  </footer>
+  <script src="../src/csv.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
