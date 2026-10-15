@@ -15,7 +15,7 @@ async function readStores() {
 function setBadge(tabId) {
   if (tabId == null) return;
   chrome.action.setBadgeText({ tabId, text: 'S' });
-  chrome.action.setBadgeBackgroundColor({ tabId, color: '#008060' });
+  chrome.action.setBadgeBackgroundColor({ tabId, color: '#c93a08' });
 }
 
 async function enrichFetch(domain) {
