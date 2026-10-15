@@ -2,22 +2,28 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Shopify Store Detector</title>
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-  <header>
-    <h1>Shopify stores <span id="count"></span></h1>
-    <input id="search" type="search" placeholder="Search stores…" aria-label="Search stores">
+  <header class="top">
+    <h1>Stores logged</h1>
+    <span id="count" class="total" aria-label="Total stores">0</span>
   </header>
+  <div class="find">
+    <input id="search" type="search" placeholder="Search stores, themes, domains" aria-label="Search stores" autocomplete="off">
+  </div>
   <ul id="list"></ul>
-  <p id="empty" hidden>No Shopify stores detected yet. Browse the web and they will show up here.</p>
+  <p id="empty" hidden>Nothing logged yet. Visit a Shopify store and it will be listed here.</p>
   <p id="status" role="status"></p>
   <footer>
-    <button id="export-csv">Export CSV</button>
-    <button id="export-json">Export JSON</button>
-    <button id="clear" class="danger">Clear all</button>
-    <label><input id="incognito" type="checkbox"> Log incognito</label>
+    <div class="buttons">
+      <button id="export-csv" class="primary">Export CSV</button>
+      <button id="export-json">Export JSON</button>
+      <button id="clear" class="danger">Clear all</button>
+    </div>
+    <label class="toggle"><input id="incognito" type="checkbox"> Log incognito windows</label>
   </footer>
   <script src="../src/csv.js"></script>
   <script src="popup.js"></script>

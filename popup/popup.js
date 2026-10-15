@@ -21,10 +21,28 @@ function el(tag, className, text) {
   return node;
 }
 
-function button(label, onClick) {
-  const b = el('button', '', label);
+function button(label, onClick, className) {
+  const b = el('button', className || '', label);
+  b.type = 'button';
   b.addEventListener('click', onClick);
   return b;
+}
+
+// Stores first logged after this moment are flagged NEW; set from the previous popup open.
+let lastOpened = Date.now();
+
+function field(label, value, valueClass) {
+  const box = el('div');
+  box.append(el('dt', '', label), el('dd', valueClass || '', value || '\u2014'));
+  return box;
+}
+
+function when(ts) {
+  const day = 86400000;
+  const startOfToday = new Date().setHours(0, 0, 0, 0);
+  if (ts >= startOfToday) return 'today';
+  if (ts >= startOfToday - day) return 'yesterday';
+  return new Date(ts).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
 }
 
 function render() {
@@ -33,38 +51,49 @@ function render() {
     .filter((s) => !q || [s.domain, s.customDomain, s.name, s.theme].some((v) => String(v || '').toLowerCase().includes(q)))
     .sort((a, b) => b.lastSeen - a.lastSeen);
 
-  $('count').textContent = `(${stores.length})`;
-  $('empty').hidden = stores.length > 0;
+  $('count').textContent = String(stores.length);
+  $('empty').hidden = shown.length > 0;
+  $('empty').textContent = stores.length
+    ? 'No stores match that search.'
+    : 'Nothing logged yet. Visit a Shopify store and it will be listed here.';
   const list = $('list');
   list.replaceChildren();
 
   for (const s of shown) {
-    const li = el('li');
-    const top = el('div', 'row-top');
-    top.append(el('span', 'name', s.name));
-    const actions = el('span', 'actions');
+    const isNew = s.firstSeen > lastOpened;
+    const li = el('li', isNew ? 'row is-new' : 'row');
+
+    const head = el('div', 'row-head');
+    head.append(el('span', 'name', s.name));
+    if (isNew) head.append(el('span', 'tag', 'NEW'));
+    const actions = el('span', 'row-actions');
     actions.append(
       button('Enrich', () => enrich(s)),
-      button('Delete', () => remove(s))
+      button('Delete', () => remove(s), 'danger')
     );
-    top.append(actions);
-    li.append(top);
+    head.append(actions);
+    li.append(head);
 
-    const bits = [s.customDomain, s.theme && `Theme: ${s.theme}`, s.currency, s.productCount != null && `${s.productCount} products`]
-      .filter(Boolean);
-    li.append(el('div', 'meta', bits.join(' · ')));
-    if (s.apps && s.apps.length) li.append(el('div', 'meta', `Apps: ${s.apps.join(', ')}`));
-    if (s.description) li.append(el('div', 'desc', s.description));
-    li.append(el('div', 'meta', `Seen ${s.visitCount}× · last ${new Date(s.lastSeen).toLocaleString()}`));
+    const fields = el('dl', 'fields');
+    fields.append(field('Domain', s.customDomain, 'domain'), field('Theme', s.theme), field('Cur', s.currency));
+    li.append(fields);
+
+    const bits = [`Seen ${s.visitCount}\u00d7`, `last ${when(s.lastSeen)}`];
+    if (s.productCount != null) bits.push(`${s.productCount} products`);
+    if (s.apps && s.apps.length) bits.push(s.apps.join(', '));
+    li.append(el('p', 'note', bits.join(' \u00b7 ')));
+    if (s.description) li.append(el('p', 'desc', s.description));
     list.append(li);
   }
 }
 
 async function load() {
-  const data = await chrome.storage.local.get(['stores', 'logIncognito']);
+  const data = await chrome.storage.local.get(['stores', 'logIncognito', 'lastOpened']);
   stores = data.stores || [];
+  if (typeof data.lastOpened === 'number') lastOpened = data.lastOpened;
   $('incognito').checked = Boolean(data.logIncognito);
   render();
+  chrome.storage.local.set({ lastOpened: Date.now() });
 }
 
 async function remove(store) {
